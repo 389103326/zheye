@@ -51,6 +51,7 @@ export default defineComponent({
     Login
   },
   setup() {
+    console.log('修改点东西')
     return {
       list: testData,
       user: currentUser
