@@ -51,15 +51,9 @@ export default defineComponent({
     Login
   },
   setup() {
-    const addLog = () => {
-      let x = 3
-      console.log(x)
-      console.log('addLog')
-    }
     return {
       list: testData,
-      user: currentUser,
-      addLog
+      user: currentUser
     }
   }
 })
