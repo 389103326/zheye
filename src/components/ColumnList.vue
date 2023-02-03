@@ -11,7 +11,7 @@
                  class="rounded-circle border border-light  w-25 my-3">
             <h5>{{column.title}}</h5>
             <p>{{column.title}}</p>
-            <a href="#">进入专栏</a>
+            <router-link :to="{name: 'columnDetail', path: 'column', params: {id: column.id}}">进入专栏</router-link>
           </div>
         </div>
       </div>
@@ -20,13 +20,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed } from 'vue'
-export interface ColumnProps {
-  id: number
-  title: string
-  avatar?: string
-  description: string
-}
+import { defineComponent, PropType, computed, onMounted } from 'vue'
+import { ColumnProps } from '@/utils/interface'
+import { testData } from '../utils/testData'
 
 export default defineComponent({
   name: 'ColumnList',

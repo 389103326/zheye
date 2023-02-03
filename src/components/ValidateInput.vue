@@ -5,7 +5,7 @@
            id="exampleInputEmail1"
            aria-describedby="emailHelp"
            v-bind="$attrs"
-           :value="inputRef.val"
+           :value="inputRef.val()"
            @input="updateValue"
            @blur="validateInput">
     <div class="form-text"
@@ -17,31 +17,55 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive } from 'vue'
+import {
+  defineComponent,
+  PropType,
+  onMounted,
+  onUnmounted,
+  reactive,
+  watch
+} from 'vue'
+import { emitter } from './ValidateForm.vue'
+
 const emailReg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/
 
 interface RuleProp {
   type: 'required' | 'email'
   message: string
 }
+interface IInputRef {
+  val: () => string
+  error: boolean
+  message: string
+}
 export type RulesProp = RuleProp[]
+interface IProps {
+  rules: RulesProp
+  modelValue: string
+}
 
 export default defineComponent({
   name: 'ValidateInput',
   props: {
-    rules: Array as PropType<RulesProp>,
-    modelValue: String
+    rules: {
+      required: true,
+      type: Array as PropType<RulesProp>
+    },
+    modelValue: {
+      required: true,
+      type: String
+    }
   },
   inheritAttrs: false,
-  setup(props, ctx) {
-    const inputRef = reactive({
-      val: props.modelValue || '',
+  // TODO 去掉IProps
+  setup(props: IProps, ctx) {
+    const inputRef: IInputRef = reactive({
+      val: () => props.modelValue,
       error: false,
       message: ''
     })
     const updateValue = (e: KeyboardEvent) => {
       const targetValue = (e.target as HTMLInputElement).value
-      inputRef.val = targetValue
       ctx.emit('update:modelValue', targetValue)
     }
     const validateInput = () => {
@@ -51,10 +75,10 @@ export default defineComponent({
           inputRef.message = rule.message
           switch (rule.type) {
             case 'required':
-              valid = inputRef.val.trim() !== ''
+              valid = inputRef.val()?.trim() !== ''
               break
             case 'email':
-              valid = emailReg.test(inputRef.val)
+              valid = emailReg.test(inputRef.val())
               break
             default:
               break
@@ -62,8 +86,19 @@ export default defineComponent({
           return valid
         })
         inputRef.error = !allValid
+        return allValid
       }
+      return true
     }
+    onMounted(() => {
+      //   console.log('props.modelValue', props.modelValue)
+      emitter.emit('validateEvent', validateInput)
+      //   console.log(foo)
+    })
+    onUnmounted(() => {
+      console.log('onUnMounted')
+    })
+
     return {
       inputRef,
       validateInput,
